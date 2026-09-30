@@ -8,6 +8,15 @@
 <meta property="og:title" content="えびダイブ食堂">
 <meta property="og:description" content="えびを操って60秒間プランクトンを食べよう。大きく育ったえびほど、豪華な料理になって出てくるブラウザゲーム。">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="えびダイブ食堂">
+<meta property="og:url" content="https://ebiha8188.github.io/ebi-dive/">
+<meta property="og:image" content="https://ebiha8188.github.io/ebi-dive/thumbnail.png">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1080">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="えびダイブ食堂">
+<meta name="twitter:description" content="えびを操って60秒間プランクトンを食べよう。大きく育ったえびほど、豪華な料理になって出てくるブラウザゲーム。">
+<meta name="twitter:image" content="https://ebiha8188.github.io/ebi-dive/thumbnail.png">
 <meta name="theme-color" content="#0b222c">
 <!-- ホーム画面に追加したとき、ブラウザのバーなしのアプリとして起動する -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -136,6 +145,20 @@
   .a2hs-actions { display: flex; gap: 14px; }
   .a2hs-link { font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); background: none; border: 0; padding: 2px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
   .a2hs-link:focus-visible { outline: 2px solid var(--plankton); outline-offset: 2px; }
+  /* シェア */
+  .share-card { width: min(440px, 100%); }
+  .share-card label { margin: 0 0 -8px; }
+  #shText { width: 100%; box-sizing: border-box; resize: none; font: inherit; font-size: 13px; line-height: 1.65; color: var(--ink); background: rgba(8,30,40,0.75); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  #shText:focus-visible { outline: 2px solid var(--plankton); outline-offset: 2px; }
+  .share-actions { display: flex; gap: 10px 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .btn.share-x { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 16px; padding: 10px 24px; background: #000; color: #fff; box-shadow: 0 4px 0 #3a3a3a; }
+  .btn.share-x:active { box-shadow: 0 1px 0 #3a3a3a; }
+  .share-x svg { width: 16px; height: 16px; }
+  .ghost.share-copy { font-size: 14px; padding: 10px 20px; }
+  .share-msg { margin: -4px 0 0; text-align: center; min-height: 1.4em; color: var(--plankton); }
+  .ghost.share-close { justify-self: center; }
+  .ticket-share svg { width: 46px; height: 46px; }
+  .ticket-share .zukan-label { color: var(--ticket-ink); }
   /* 作成者表示（ランキングボタンの上） */
   .credit { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; align-items: center; gap: 7px; padding: 3px 3px 3px 11px; border-radius: 999px; border: 1px solid var(--line); background: rgba(8,30,40,0.72); color: var(--ink); font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; }
   .credit[hidden] { display: none; }
@@ -445,6 +468,17 @@
           </svg>
           <span class="zukan-label">お品書き <b id="menuBtnCount">0/13</b></span>
         </button>
+        <button id="shareGameBtn" class="zukan-btn" type="button" aria-label="このゲームをシェア" title="このゲームをシェア">
+          <svg viewBox="0 0 64 64" width="62" height="62" aria-hidden="true">
+            <ellipse cx="32" cy="58" rx="20" ry="3" fill="rgba(0,0,0,0.3)"/>
+            <circle cx="32" cy="30" r="24" fill="#fff0c2" stroke="#e6c872" stroke-width="1.5"/>
+            <path d="M22.5 30L41.5 20.5M22.5 30L41.5 39.5" stroke="#2b3a44" stroke-width="3.2" stroke-linecap="round"/>
+            <circle cx="21.5" cy="30" r="6" fill="#ff7a57"/>
+            <circle cx="42.5" cy="20" r="5.6" fill="#2b3a44"/>
+            <circle cx="42.5" cy="40" r="5.6" fill="#2b3a44"/>
+          </svg>
+          <span class="zukan-label">シェア</span>
+        </button>
       </div>
     </div>
 
@@ -566,6 +600,23 @@
       </div>
     </div>
 
+    <div id="sharePanel" class="overlay sound-panel" hidden>
+      <div class="sp-card share-card" role="dialog" aria-labelledby="shTitle">
+        <h3 id="shTitle">シェア</h3>
+        <label for="shText" class="mode-hint">投稿する文面</label>
+        <textarea id="shText" readonly rows="7"></textarea>
+        <div class="share-actions">
+          <a id="shX" class="btn share-x" href="https://x.com/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X で投稿
+          </a>
+          <button id="shCopy" class="ghost small share-copy" type="button">文面をコピー</button>
+        </div>
+        <p class="mode-hint share-msg" id="shMsg" aria-live="polite"></p>
+        <button id="shClose" class="ghost small share-close" type="button">閉じる</button>
+      </div>
+    </div>
+
     <div id="soundPanel" class="overlay sound-panel" hidden>
       <div class="sp-card" role="dialog" aria-labelledby="spTitle">
         <h3 id="spTitle">サウンド設定</h3>
@@ -597,6 +648,9 @@
         <div class="title-actions">
           <button id="againBtn" class="btn" type="button">もう一度もぐる！</button>
           <button id="titleBtn" class="ghost small ticket-ghost" type="button">タイトルへ</button>
+          <button id="shareResultBtn" class="zukan-btn ticket-share" type="button" aria-label="結果をシェア" title="結果をシェア">
+            <span class="zukan-label">結果をシェア</span>
+          </button>
         </div>
       </div>
     </div>
@@ -714,6 +768,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     try { localStorage.setItem(PLAYER_KEY, JSON.stringify(player)); } catch (e) {}
   }
   const myId = player.id;
+  let lastRankRows = []; // 最後に読んだ上位10件（シェア文の「現在第○位」に使う）
   const api = (path, opts = {}) => fetch(String(CFG.supabaseUrl).replace(/\/$/, '') + path, {
     ...opts,
     // apikey ヘッダーだけで匿名（anon）として扱われる。新しい publishable key でも旧 anon key でも動く
@@ -728,6 +783,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
       .map(r => ({ ...r, id: r.player_id }))
       .filter(r => typeof r.score === 'number' && isFinite(r.score) && r.score >= 0 && r.score <= MAX_SCORE)
       .slice(0, 10);
+    lastRankRows = rows;
     rankList.innerHTML = '';
     setRankNote(rows.length ? '' : 'まだ誰も潜っていません。最初の一皿をどうぞ。');
     rows.forEach((r, i) => {
@@ -783,7 +839,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
       if (res.status === 404 || res.status === 400) res = await send(base);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const r = await res.json();
-      refreshRanking();
+      await refreshRanking();
       return r && r.kind === 'kept' ? { kind: 'kept', prev: r.prev } : { kind: 'best' };
     } catch (e) {
       return { kind: 'denied' };
@@ -2624,7 +2680,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     try { localStorage.setItem(NAME_KEY, cleanName(nameInput.value)); } catch (e) {}
     state = 'play';
     titleCard.hidden = true; resultCard.hidden = true; pauseCard.hidden = true;
-    soundPanel.hidden = true; zukanPanel.hidden = true;
+    soundPanel.hidden = true; zukanPanel.hidden = true; sharePanel.hidden = true;
     $('pauseBtn').hidden = false; $('fsBtn').hidden = true;
     cv.focus({ preventScroll: true });
   }
@@ -2665,7 +2721,11 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     }
     const status = $('rankStatus');
     status.textContent = RANK.ready ? 'ランキングに送信中…' : '';
-    submitScore(G.score, d.id, G.hard ? 'hard' : 'normal').then(r => {
+    // シェア用に今回の結果を控える（順位はランキング送信のあとで入る）
+    const share = G.share = { dishId: d.id, score: G.score, hard: G.hard, name: playerName(), rank: 0 };
+    share.ready = submitScore(G.score, d.id, G.hard ? 'hard' : 'normal').then(r => {
+      const idx = lastRankRows.findIndex(x => x.id === myId);
+      share.rank = RANK.ready && idx >= 0 ? idx + 1 : 0;
       status.textContent = {
         best: 'ランキングに記録しました。',
         kept: `ランキングの記録は自己ベストの ${r.prev}pt のままです。`,
@@ -2948,6 +3008,63 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   const closeSound = () => { soundPanel.hidden = true; $(state === 'paused' ? 'pzSound' : 'soundBtn').focus({ preventScroll: true }); };
   $('spClose').addEventListener('click', closeSound);
   soundPanel.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSound(); } });
+
+  // ---------- シェア ----------
+  // リンク先のページに合わせて X がカード画像を出す（タイトル＝サムネイル、結果＝料理ごとの画像）
+  const SITE = new URL('./', location.href).href;
+  const sharePanel = $('sharePanel');
+  let shareOpener = null;
+  function titleShareText() {
+    return [
+      'えびを操って60秒、大きく育てるほど豪華な料理になるブラウザゲーム「えびダイブ食堂」。一緒に遊びませんか？',
+      '#えび食堂',
+      SITE,
+    ].join('\n');
+  }
+  function resultShareText(s) {
+    const d = ALL_DISHES.find(x => x.id === s.dishId) || DISHES[0];
+    let l1 = `今日のまかないは「${d.name}」！`, l2 = 'えびを育てて料理にするゲーム、君も一緒に潜ってみない？';
+    if (d.id === 'nitsuke') { l1 = `今日のまかないは「${d.name}」…えびは鯛に食べられました。`; l2 = 'リベンジ待ってます。君も一緒に潜ってみない？'; }
+    if (d.id === 'bait') { l1 = `今日のまかないは「${d.name}」…えびは網にかかって釣り餌になりました。`; l2 = 'リベンジ待ってます。君も一緒に潜ってみない？'; }
+    const lines = [l1, l2, '#えび食堂', `${SITE}d/${d.id}.html`, `${s.name}さんは${s.score}pt獲得！${s.hard ? '（HARD）' : ''}`];
+    if (s.rank) lines.push(`現在第${s.rank}位！`);
+    return lines.join('\n');
+  }
+  function openShare(text, opener) {
+    shareOpener = opener;
+    $('shText').value = text;
+    $('shX').href = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
+    $('shMsg').textContent = '';
+    sharePanel.hidden = false;
+    $('shX').focus({ preventScroll: true });
+  }
+  const closeShare = () => { sharePanel.hidden = true; if (shareOpener) shareOpener.focus({ preventScroll: true }); };
+  $('shareGameBtn').addEventListener('click', () => openShare(titleShareText(), $('shareGameBtn')));
+  // 結果ボタンにはタイトルのシェアアイコンを複製して使う
+  $('shareResultBtn').prepend($('shareGameBtn').querySelector('svg').cloneNode(true));
+  $('shareResultBtn').addEventListener('click', async () => {
+    const s = G.share;
+    if (!s) return;
+    // ランキングの送信がまだなら、少しだけ待って順位を文面に入れる
+    await Promise.race([s.ready, new Promise(r => setTimeout(r, 3000))]).catch(() => {});
+    openShare(resultShareText(s), $('shareResultBtn'));
+  });
+  $('shCopy').addEventListener('click', async () => {
+    const text = $('shText').value;
+    try {
+      await navigator.clipboard.writeText(text);
+      $('shMsg').textContent = 'コピーしました。X などに貼り付けて使えます。';
+    } catch (e) {
+      const ta = $('shText');
+      ta.focus(); ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (err) {}
+      $('shMsg').textContent = ok ? 'コピーしました。X などに貼り付けて使えます。' : '自動でコピーできませんでした。文面を選んでコピーしてください。';
+    }
+  });
+  $('shX').addEventListener('click', () => { $('shMsg').textContent = 'X の投稿画面を開きました。'; });
+  $('shClose').addEventListener('click', closeShare);
+  sharePanel.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeShare(); } });
   bgmToggle.addEventListener('click', () => { Sound.setOn(!Sound.settings.on); renderSound(); });
   volRange.addEventListener('input', () => { Sound.setVol(volRange.value / 100); renderSound(); });
   nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); startGame(); } });
@@ -2955,7 +3072,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   function backToTitle() {
     state = 'title';
     resultCard.hidden = true; pauseCard.hidden = true; titleCard.hidden = false;
-    soundPanel.hidden = true; zukanPanel.hidden = true;
+    soundPanel.hidden = true; zukanPanel.hidden = true; sharePanel.hidden = true;
     $('pauseBtn').hidden = true; $('fsBtn').hidden = false; $('dashFloat').hidden = true;
     stickEl.hidden = true; releaseStick();
     $('rankBtn').hidden = false; $('creditBox').hidden = false;
@@ -2981,7 +3098,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   }
   function resumeGame() {
     if (state !== 'paused') return;
-    soundPanel.hidden = true; zukanPanel.hidden = true;
+    soundPanel.hidden = true; zukanPanel.hidden = true; sharePanel.hidden = true;
     pauseCard.hidden = true;
     for (const k in keys) keys[k] = false;
     $('pauseBtn').hidden = false; $('fsBtn').hidden = true; $('dashFloat').hidden = false; stickEl.hidden = !stickMode();
@@ -3102,7 +3219,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
       e.preventDefault();
       isFull ? exitFull() : enterFull();
     }
-    if (e.key === 'Enter' && state === 'title' && soundPanel.hidden && zukanPanel.hidden && wardrobePanel.hidden && menuPanel.hidden && rankPanel.hidden && document.activeElement === document.body) startGame();
+    if (e.key === 'Enter' && state === 'title' && soundPanel.hidden && zukanPanel.hidden && wardrobePanel.hidden && menuPanel.hidden && rankPanel.hidden && sharePanel.hidden && document.activeElement === document.body) startGame();
   });
   addEventListener('keyup', e => { if (e.key in KMAP) keys[KMAP[e.key]] = false; });
   addEventListener('blur', () => { for (const k in keys) keys[k] = false; ptr.active = false; });
