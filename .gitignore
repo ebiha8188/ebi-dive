@@ -1,0 +1,5 @@
+# GitHub には送らないもの（Supabase 用の SQL と手順書）
+*.sql
+README.html
+.check/
+.gen/

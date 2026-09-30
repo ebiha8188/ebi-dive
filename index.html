@@ -2724,8 +2724,9 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     // シェア用に今回の結果を控える（順位はランキング送信のあとで入る）
     const share = G.share = { dishId: d.id, score: G.score, hard: G.hard, name: playerName(), rank: 0 };
     share.ready = submitScore(G.score, d.id, G.hard ? 'hard' : 'normal').then(r => {
+      // 順位を載せるのは「今回のプレイで自己ベストを更新し、そのスコアがトップ10に入った」ときだけ
       const idx = lastRankRows.findIndex(x => x.id === myId);
-      share.rank = RANK.ready && idx >= 0 ? idx + 1 : 0;
+      share.rank = RANK.ready && r.kind === 'best' && idx >= 0 ? idx + 1 : 0;
       status.textContent = {
         best: 'ランキングに記録しました。',
         kept: `ランキングの記録は自己ベストの ${r.prev}pt のままです。`,
