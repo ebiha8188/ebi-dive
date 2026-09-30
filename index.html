@@ -3018,7 +3018,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   function titleShareText() {
     return [
       'えびを操って60秒、大きく育てるほど豪華な料理になるブラウザゲーム「えびダイブ食堂」。一緒に遊びませんか？',
-      '#えび食堂',
+      '#えびダイブ食堂',
       SITE,
     ].join('\n');
   }
@@ -3027,7 +3027,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     let l1 = `今日のまかないは「${d.name}」！`, l2 = 'えびを育てて料理にするゲーム、君も一緒に潜ってみない？';
     if (d.id === 'nitsuke') { l1 = `今日のまかないは「${d.name}」…えびは鯛に食べられました。`; l2 = 'リベンジ待ってます。君も一緒に潜ってみない？'; }
     if (d.id === 'bait') { l1 = `今日のまかないは「${d.name}」…えびは網にかかって釣り餌になりました。`; l2 = 'リベンジ待ってます。君も一緒に潜ってみない？'; }
-    const lines = [l1, l2, '#えび食堂', `${SITE}d/${d.id}.html`, `${s.name}さんは${s.score}pt獲得！${s.hard ? '（HARD）' : ''}`];
+    const lines = [l1, l2, '#えびダイブ食堂', `${SITE}d/${d.id}.html`, `${s.name}さんは${s.score}pt獲得！${s.hard ? '（HARD）' : ''}`];
     if (s.rank) lines.push(`現在第${s.rank}位！`);
     return lines.join('\n');
   }
