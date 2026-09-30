@@ -9,6 +9,13 @@
 <meta property="og:description" content="えびを操って60秒間プランクトンを食べよう。大きく育ったえびほど、豪華な料理になって出てくるブラウザゲーム。">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#0b222c">
+<!-- ホーム画面に追加したとき、ブラウザのバーなしのアプリとして起動する -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="えびダイブ">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230f3a48'/%3E%3Cpath d='M44 22c-9-6-24-3-27 9-2 7 3 13 9 15l-5 7 9-4 1 5 3-6c9-1 15-9 13-17' fill='%23ff7a57'/%3E%3Ccircle cx='40' cy='26' r='2.6' fill='%23111'/%3E%3C/svg%3E">
 <style>
   /* claude.ai の表示枠が用意していた最小限のリセットを自前で持つ */
@@ -115,11 +122,27 @@
   .zk-detail b { color: #fff3b0; }
   .zk-card .btn { justify-self: center; font-size: 15px; padding: 8px 26px; }
   .treasure-note { color: #2f6f8a; }
-  .rank-btn { position: absolute; top: 10px; right: 10px; z-index: 2; display: grid; justify-items: center; gap: 1px; padding: 6px 8px 4px; border-radius: 10px; border: 1px solid var(--line); background: rgba(8,30,40,0.72); color: var(--ink); font: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; touch-action: manipulation; }
+  .rank-btn { position: absolute; top: 48px; right: 10px; z-index: 2; display: grid; justify-items: center; gap: 1px; padding: 6px 8px 4px; border-radius: 10px; border: 1px solid var(--line); background: rgba(8,30,40,0.72); color: var(--ink); font: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; touch-action: manipulation; }
   .rank-btn svg { display: block; transition: transform 0.15s; }
   .rank-btn:hover svg { transform: translateY(-2px); }
   .rank-btn:focus-visible { outline: 3px solid var(--plankton); outline-offset: 2px; }
   .rank-btn[hidden] { display: none; }
+  /* ホーム画面に追加の案内（iPhone / iPad のブラウザだけ） */
+  .a2hs { max-width: min(420px, 100%); display: grid; gap: 4px; justify-items: center; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(198,239,110,0.45); background: rgba(8,30,40,0.8); font-size: 12.5px; line-height: 1.6; text-align: center; }
+  .a2hs[hidden] { display: none; }
+  .a2hs p { margin: 0; }
+  .a2hs-lead { font-weight: 700; color: var(--plankton); }
+  .a2hs-steps { color: var(--ink); }
+  .a2hs-actions { display: flex; gap: 14px; }
+  .a2hs-link { font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); background: none; border: 0; padding: 2px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .a2hs-link:focus-visible { outline: 2px solid var(--plankton); outline-offset: 2px; }
+  /* 作成者表示（ランキングボタンの上） */
+  .credit { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; align-items: center; gap: 7px; padding: 3px 3px 3px 11px; border-radius: 999px; border: 1px solid var(--line); background: rgba(8,30,40,0.72); color: var(--ink); font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; }
+  .credit[hidden] { display: none; }
+  .x-btn { width: 28px; height: 28px; border-radius: 50%; background: #000; color: #fff; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.25); transition: transform 0.12s; }
+  .x-btn svg { width: 14px; height: 14px; }
+  .x-btn:hover { transform: scale(1.08); }
+  .x-btn:focus-visible { outline: 3px solid var(--plankton); outline-offset: 2px; }
   .snd-mute { display: none; }
   .muted .snd-waves { display: none; }
   .muted .snd-mute { display: inline; }
@@ -227,15 +250,18 @@
   .rank { display: grid; gap: 10px; align-content: start; }
   .rank h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: 0.1em; }
   #rankList { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-  #rankList li { display: grid; grid-template-columns: 2.2em 1fr auto; gap: 4px 10px; align-items: baseline; padding: 6px 8px; border-radius: 8px; }
+  #rankList li { display: grid; grid-template-columns: 2.2em 36px minmax(0, 1fr) auto; grid-template-rows: auto auto; gap: 0 10px; align-items: center; padding: 6px 8px; border-radius: 8px; }
+  #rankList .rk { grid-column: 1; grid-row: 1 / span 2; }
+  #rankList .ic { grid-column: 2; grid-row: 1 / span 2; width: 36px; height: 36px; display: block; }
+  #rankList .who { grid-column: 3; grid-row: 1; }
   #rankList li.me { background: rgba(255,122,87,0.14); box-shadow: inset 0 0 0 1px rgba(255,122,87,0.5); }
   #rankList .rk { font-family: var(--display); color: var(--muted); font-variant-numeric: tabular-nums; }
   #rankList li:nth-child(1) .rk { color: #ffd35a; }
   #rankList li:nth-child(2) .rk { color: #d6e2e4; }
   #rankList li:nth-child(3) .rk { color: #e0a070; }
   #rankList .who { font-weight: 700; overflow-wrap: anywhere; }
-  #rankList .dishn { grid-column: 2; font-size: 12px; color: var(--muted); }
-  #rankList .sc { grid-row: 1; grid-column: 3; font-family: var(--display); font-variant-numeric: tabular-nums; }
+  #rankList .dishn { grid-column: 3; grid-row: 2; font-size: 12px; color: var(--muted); line-height: 1.4; }
+  #rankList .sc { grid-row: 1 / span 2; grid-column: 4; font-family: var(--display); font-variant-numeric: tabular-nums; }
   #rankList .sc small { font-family: var(--body); font-size: 11px; color: var(--muted); margin-left: 2px; }
   .rank-note { margin: 0; color: var(--muted); font-size: 13px; }
 
@@ -288,6 +314,7 @@
   .stage.is-full > #titleCard > :first-child, .stage.is-full > #resultCard > :first-child { margin-top: auto; }
   .stage.is-full > #titleCard > :last-child, .stage.is-full > #resultCard > :last-child { margin-bottom: auto; }
   .stage.is-full > #pauseCard > .pz-center { margin-block: auto; }
+  .stage.is-full > #titleCard > .a2hs[hidden] + .title-big { margin-top: auto; }
   .stage.is-full > [hidden] { display: none !important; }
   @media (max-height: 520px) {
     .stage.is-full .title-big { font-size: 22px; }
@@ -300,7 +327,7 @@
   #game { position: relative; z-index: 0; }
   #titleCard, #resultCard, #pauseCard { position: relative; z-index: 1; }
   .sound-panel { position: relative; }
-  #titleCard, #resultCard, #pauseCard, .sound-panel, .zukan-panel, .rank-btn, .pause-btn, .fs-btn, .dash-float, .stick {
+  #titleCard, #resultCard, #pauseCard, .sound-panel, .zukan-panel, .rank-btn, .credit, .pause-btn, .fs-btn, .dash-float, .stick {
     -webkit-transform: translateZ(0); transform: translateZ(0);
   }
 </style>
@@ -321,6 +348,14 @@
     <div id="stick" class="stick" hidden aria-hidden="true"><div class="stick-knob"></div></div>
 
     <div id="titleCard" class="overlay">
+      <div id="a2hs" class="a2hs" hidden>
+        <p class="a2hs-lead" id="a2hsLead"></p>
+        <p class="a2hs-steps" id="a2hsSteps" hidden></p>
+        <div class="a2hs-actions">
+          <button id="a2hsHow" class="a2hs-link" type="button" aria-expanded="false" aria-controls="a2hsSteps">やり方</button>
+          <button id="a2hsClose" class="a2hs-link" type="button">閉じる</button>
+        </div>
+      </div>
       <p class="title-big">今日のまかないは、<br>きみ次第。</p>
       <div class="name-field">
         <label for="nameInput">ランキングに載せる名前</label>
@@ -465,6 +500,13 @@
         <button id="pzSound" class="zukan-btn" type="button" aria-label="サウンド設定" title="サウンド設定"><span class="zukan-label">サウンド</span></button>
         <button id="pzZukan" class="zukan-btn" type="button" aria-label="海の宝物図鑑" title="海の宝物図鑑"><span class="zukan-label">宝物図鑑</span></button>
       </div>
+    </div>
+
+    <div id="creditBox" class="credit">
+      <span class="credit-name">作成者：えびは</span>
+      <a class="x-btn" href="https://x.com/Liebudo_ebiha" target="_blank" rel="noopener" aria-label="作成者 えびは の X（@Liebudo_ebiha）を開く" title="@Liebudo_ebiha">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
     </div>
 
     <button id="rankBtn" class="rank-btn" type="button" aria-label="ランキング" title="ランキング">
@@ -692,8 +734,16 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
       const li = document.createElement('li');
       if (r.id === myId) li.className = 'me';
       const dish = ALL_DISHES.find(d => d.id === r.dish) || dishFor(r.score);
-      li.innerHTML = '<span class="rk"></span><span class="who"></span><span class="sc"></span><span class="dishn"></span>';
+      li.innerHTML = '<span class="rk"></span><canvas class="ic" aria-hidden="true"></canvas><span class="who"></span><span class="sc"></span><span class="dishn"></span>';
       li.querySelector('.rk').textContent = i + 1;
+      // 自己ベストを出したときの色とかぶりもので、えびのアイコンを描く
+      const ic = li.querySelector('.ic'), S = 36;
+      ic.width = S * dpr; ic.height = S * dpr;
+      const icx = ic.getContext('2d');
+      icx.setTransform(dpr * S / 62, 0, 0, dpr * S / 62, 0, dpr * 1);
+      const rs = SKINS.some(k => k.id === r.skin) ? r.skin : 'normal';
+      const rh = HATS.some(h => h.id === r.hat) ? r.hat : 'none';
+      drawIconArt(icx, rs, rh);
       const who = li.querySelector('.who');
       who.textContent = (cleanName(r.name) || DEFAULT_NAME) + (r.id === myId ? '（あなた）' : '');
       if (r.mode === 'hard') { const tag = document.createElement('span'); tag.className = 'hard-tag'; tag.textContent = 'HARD'; who.appendChild(tag); }
@@ -708,7 +758,10 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   async function refreshRanking() {
     if (!RANK.ready) { setRankNote('ランキングは準備中です。'); return; }
     try {
-      const res = await api('/rest/v1/scores?select=player_id,name,score,dish,mode&order=score.desc,updated_at.asc&limit=30');
+      const q = cols => `/rest/v1/scores?select=${cols}&order=score.desc,updated_at.asc&limit=30`;
+      let res = await api(q('player_id,name,score,dish,mode,skin,hat'));
+      // 追加 SQL（skin / hat 列）をまだ実行していないデータベースでも表示できるようにする
+      if (!res.ok) res = await api(q('player_id,name,score,dish,mode'));
       if (!res.ok) throw new Error('HTTP ' + res.status);
       renderRanking(await res.json());
     } catch (e) {
@@ -723,10 +776,11 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   async function submitScore(score, dishId, mode) {
     if (!RANK.ready) return { kind: 'off' };
     try {
-      const res = await api('/rest/v1/rpc/submit_score', {
-        method: 'POST',
-        body: JSON.stringify({ p_player: myId, p_secret: player.secret, p_name: playerName(), p_score: Math.floor(score), p_dish: dishId, p_mode: mode }),
-      });
+      const base = { p_player: myId, p_secret: player.secret, p_name: playerName(), p_score: Math.floor(score), p_dish: dishId, p_mode: mode };
+      const send = body => api('/rest/v1/rpc/submit_score', { method: 'POST', body: JSON.stringify(body) });
+      let res = await send({ ...base, p_skin: skin, p_hat: hat });
+      // 追加 SQL をまだ実行していないデータベースでは、色とかぶりものなしで登録する
+      if (res.status === 404 || res.status === 400) res = await send(base);
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const r = await res.json();
       refreshRanking();
@@ -1908,8 +1962,10 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
       gf.t += dt; gf.life -= dt;
       if (gf.y < gf.ty) gf.y = Math.min(gf.ty, gf.y + 110 * dt);
       if (Math.hypot(gf.x - p.x, gf.y - p.y) < pr + 16) {
-        G.score += GOLD_FOOD_PTS; G.gold = null;
-        popText(gf.x, gf.y - 22, `+${GOLD_FOOD_PTS} 金色の栄養食！`, '#ffe36e');
+        // 無敵（虹色プランクトン・鯛のウロコ）中はスコア2倍の対象
+        const gp = GOLD_FOOD_PTS * (p.power > 0 ? 2 : 1);
+        G.score += gp; G.gold = null;
+        popText(gf.x, gf.y - 22, `+${gp} 金色の栄養食！`, '#ffe36e');
         for (let k = 0; k < 16; k++) burst(gf.x, gf.y, 1, k % 2 ? '#ffd35a' : '#fff3b0');
       } else if (gf.life <= 0) G.gold = null;
     }
@@ -2562,7 +2618,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     for (const k in keys) keys[k] = false;
     ptr.active = false; ptr.hold = false;
     $('dashFloat').hidden = false;
-    $('rankBtn').hidden = true; rankPanel.hidden = true;
+    $('rankBtn').hidden = true; $('creditBox').hidden = true; rankPanel.hidden = true;
     releaseStick();
     stickEl.hidden = !stickMode();
     try { localStorage.setItem(NAME_KEY, cleanName(nameInput.value)); } catch (e) {}
@@ -2578,7 +2634,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     state = 'result';
     $('dashFloat').hidden = true;
     $('pauseBtn').hidden = true; $('fsBtn').hidden = false;
-    $('rankBtn').hidden = false;
+    $('rankBtn').hidden = false; $('creditBox').hidden = false;
     stickEl.hidden = true; releaseStick();
     const bad = G.reason === 'tai' || G.reason === 'net';
     Sound.play(bad ? 'bad' : 'sea');
@@ -2681,12 +2737,12 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     $('wdSaveMsg').textContent = 'いまの色とかぶりもののアイコンを PNG（512×512）で保存';
   }
   // 丸枠＋えび（アイコン本体）。座標は 62px 基準、円の中心 (31,30)・半径 24
-  function drawIconArt(c) {
+  function drawIconArt(c, sk = skin, ht = hat) {
     c.fillStyle = '#e9e1f5'; c.beginPath(); c.arc(31, 30, 24, 0, Math.PI * 2); c.fill();
     c.strokeStyle = '#b9a8d6'; c.lineWidth = 1.5; c.stroke();
     c.save();
     c.beginPath(); c.arc(31, 30, 22.5, 0, Math.PI * 2); c.clip();
-    drawShrimp(c, 16, 37, 1.0, 1, 0.4, { skin, hat }); // 頭とかぶりものが枠の中心に来るよう寄せて描く
+    drawShrimp(c, 16, 37, 1.0, 1, 0.4, { skin: sk, hat: ht }); // 頭とかぶりものが枠の中心に来るよう寄せて描く
     c.restore();
   }
   // 保存用: 同じ絵を 512×512 の透明背景 PNG に描く
@@ -2902,7 +2958,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
     soundPanel.hidden = true; zukanPanel.hidden = true;
     $('pauseBtn').hidden = true; $('fsBtn').hidden = false; $('dashFloat').hidden = true;
     stickEl.hidden = true; releaseStick();
-    $('rankBtn').hidden = false;
+    $('rankBtn').hidden = false; $('creditBox').hidden = false;
     Sound.play('sea');
     $('startBtn').focus({ preventScroll: true });
   }
@@ -2973,6 +3029,37 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
   document.addEventListener('fullscreenchange', onFsChange);
   document.addEventListener('webkitfullscreenchange', onFsChange);
   $('fsBtn').addEventListener('click', () => { isFull ? exitFull() : enterFull(); });
+
+  // ---------- ホーム画面アプリ ----------
+  // ホーム画面から起動したときは、最初からゲーム画面いっぱいの表示にする
+  const isStandalone = (window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches) || navigator.standalone === true;
+  if (isStandalone) setFullUI(true);
+  // iPhone / iPad のブラウザで開いたときだけ、「ホーム画面に追加」の案内を出す
+  (() => {
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!isIOS || isStandalone) return;
+    try { if (localStorage.getItem('ebi-dive-a2hs-closed') === '1') return; } catch (e) {}
+    const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|Line\/|Instagram|FBAN|FBAV/.test(ua);
+    if (isSafari) {
+      $('a2hsLead').textContent = 'ホーム画面に追加すると、ブラウザのバーなしの全画面で遊べます。';
+      $('a2hsSteps').textContent = '画面下（iPad は右上）の共有ボタン（四角から上向き矢印）→「ホーム画面に追加」→「追加」。ホーム画面にできた えびのアイコンから起動してください。';
+    } else {
+      $('a2hsLead').textContent = 'このアプリの中だと画面が狭くなります。Safari で開き直すと、全画面で遊べます。';
+      $('a2hsSteps').textContent = '右上や下のメニュー（「…」や共有ボタン）から「Safari で開く」を選びます。Safari で開いたら、共有ボタン →「ホーム画面に追加」で、ブラウザのバーなしで遊べるようになります。';
+    }
+    $('a2hs').hidden = false;
+    $('a2hsHow').addEventListener('click', () => {
+      const open = $('a2hsSteps').hidden;
+      $('a2hsSteps').hidden = !open;
+      $('a2hsHow').setAttribute('aria-expanded', String(open));
+      $('a2hsHow').textContent = open ? 'やり方を閉じる' : 'やり方';
+    });
+    $('a2hsClose').addEventListener('click', () => {
+      $('a2hs').hidden = true;
+      try { localStorage.setItem('ebi-dive-a2hs-closed', '1'); } catch (e) {}
+    });
+  })();
 
   // プレイ中に別のタブやアプリへ切り替えたら自動でポーズ
   document.addEventListener('visibilitychange', () => { if (document.hidden) pauseGame(); });
